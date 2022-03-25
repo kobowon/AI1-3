@@ -1,0 +1,3 @@
+CUDA_VISIBLE_DEVICES=0 python classify.py \
+    --model_path '/data/bowon_ko/TBERT_Distil/220110/model_epoch_2.pth' \
+    --output_dir '/data/bowon_ko/TBERT_Distil/220110/finetune/acall/' \
