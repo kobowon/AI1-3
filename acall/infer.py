@@ -48,7 +48,7 @@ def infer(args, text):#inference_text가 List일 수도 있음(추후 확장 고
                             page_num=args.page_num,
                             max_seq_len=args.max_seq_len,
                             batch_size=args.infer_batch_size,
-                            shuffle=True,
+                            shuffle=False,
                             **kwargs)
     dataloader = data_obj.loader
     
@@ -64,6 +64,8 @@ def infer(args, text):#inference_text가 List일 수도 있음(추후 확장 고
     
     preds = None
     label_ids = None
+    
+    start_time = time.time()
     
     for batch in tqdm(dataloader):
         #collate_fn result : t_input_ids, t_input_attention_mask, t_input_label_ids
@@ -84,6 +86,8 @@ def infer(args, text):#inference_text가 List일 수도 있음(추후 확장 고
         else:
             preds = np.append(preds, logits, axis=0)#(b,page_num)
 
+    #check logit
+    print(preds)
     preds = list(np.argmax(preds, axis=1)) #(b)
     #print(preds)
     
@@ -93,27 +97,89 @@ def infer(args, text):#inference_text가 List일 수도 있음(추후 확장 고
     preds_label = [id2label[str(p)] for p in preds]
     print(preds_label)
     
+    print(f'경과 시간 : {time.time() - start_time}')
+
+def infer_simple(args, text):#inference_text : 하나의 text
+    #Set GPU
+    args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    #Load tokenizer
+    tokenizer = KobortTokenizer("wp-mecab").tokenizer
+    
+    #read data
+    data = make_acall_data(file_path=None, inference_text=[text])
+    
+    #make data object
+    kwargs = (
+        {"num_workers":torch.cuda.device_count(), "pin_memory":True} if torch.cuda.is_available()
+        else {}
+    )
+    data_obj = AcallDataset(tokenizer=tokenizer,
+                            dataset=data,
+                            page_num=args.page_num,
+                            max_seq_len=args.max_seq_len,
+                            batch_size=args.infer_batch_size,
+                            shuffle=False,
+                            **kwargs)
+    dataloader = data_obj.loader
+    
+    #Load model
+    logger.info("load model...")
+    labels = ['페이지 : '+str(i) for i in range(1,args.page_num+1)]
+    id2label = {str(i):label for i, label in enumerate(labels)}
+    model = RobertaForSequenceClassification.from_pretrained(args.model_path,
+                                                            num_labels = args.page_num,
+                                                            id2label = {str(i):label for i, label in enumerate(labels)},
+                                                            label2id = id2label)
+    model.to(args.device)
+    model.eval()
+    
+    preds = None
+    label_ids = None
+    
+    start_time = time.time()
+    
+    for batch in tqdm(dataloader):
+        #collate_fn result : t_input_ids, t_input_attention_mask, t_input_label_ids
+        batch = tuple(tensor.to(args.device) for tensor in batch)
+        inputs = {"input_ids": batch[0],
+                  "attention_mask": batch[1],
+                  "labels": None,
+                  "token_type_ids": None}
+        
+        with torch.no_grad():
+            outputs = model(**inputs)
+            
+        logits = outputs['logits']
+        logits = logits.detach().cpu().numpy()[0]
+        #check logit
+        print(logits)
+        preds = np.argmax(logits, axis=0)
+        preds_label = id2label[str(preds)]
+        
+        return preds_label
+    
+    print(f'경과 시간 : {time.time() - start_time}')
+  
+  
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--model_path", type=str, default='/data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_1') 
-    parser.add_argument("--page_num", type=int, default=20)
+    parser.add_argument("--model_path", type=str, default='/data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_2') 
+    parser.add_argument("--page_num", type=int, default=5)
     parser.add_argument("--max_seq_len", type=int, default=128)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--infer_batch_size", type=int, default=1)
+    parser.add_argument("--infer_batch_size", type=int, default=2)
     
     args = parser.parse_args()
     
     
     init_logger()
     set_seed(args)
-    infer(args, ["가변 길이의 문자열을 저장하는 데이터 타입은 무엇인가?","세 개 이상의 테이블을 조인하는 방법은?","동의어를 공용으로 정의하여 모든 사용자가 사용 가능한 동의어를 무엇이라 부르는가?"])
-    #2,17,13
-        
-        
-        
-     #'사용자 정의형은 어디에 저장 되는가','티베로에서 제공하는 가장 큰 데이터 타입은 무엇인가','형식 문자열은 숫자형과 날짜형을 문자열로 변환하는 형식을 정의한 것이다. 또한, 변환 뿐만 아니라 반대로 변환된 숫자형과 날짜형을 다시 복구하는데 필요하다. 정해진 시간 형식이 아니거나 숫자와 문자를 동시에 포함하는 문자열은 날짜형과 숫자형으로 변환할 수 없다.'   
-                        
+    infer(args, ["정수나 실수를 저장하는 데이터 타입은 무엇인가?","티베로에서는 어떤 숫자 타입을 지원하는가?", "특정 컬럼을 빠르게 검색 할 수 있도록 해주는 데이터 구조는 무엇인가?", "모든 테이블의 기본 키 컬럼에 자동으로 생성되는 것은 무엇인가?", "티베로의 함수는 무엇으로 구분되는가?", "대부분의 함수는 하나 이상의 파라미터를 입력으로 받고 무엇을 반환하는가?","서로 다른 두 테이블의 컬럼을 비교하는 조인 조건은 어느 절에서 이루어지는가?",  "세 개 이상의 테이블을 조인하는 방법은?", "CONNECT BY와 WHERE가 하나의 SELECT에 동시에 있을 경우 WHERE가 먼저 수행 되는 경우는?", "상하 관계를 유지한 상태에서 정렬하는 절은?"])
+    #, "변환값이 NUMBER 타입인 경우 컬럼의 무엇과 무엇의 범위 내여야 하는가?", "티베로에서는 테이블 간의 조인 순서는 무엇이 정하는가?","CONNECT BY와 WHERE가 하나의 SELECT에 동시에 있을 경우 WHERE가 먼저 수행 되는 경우는?"
+    answer = infer_simple(args,"상하 관계를 유지한 상태에서 정렬하는 절은?")
+    print(answer)
                             
     

@@ -1,0 +1,17 @@
+{
+  "model_path": "/data/bowon_ko/TBERT_Distil/220110/final",
+  "output_dir": "/data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_2",
+  "page_num": 5,
+  "max_seq_len": 128,
+  "data_dir": "/home/ubuntu/bowon_ko/AI1-3/acall/data",
+  "train_file": "acall_data_simple.json",
+  "do_train": true,
+  "do_eval": false,
+  "train_batch_size": 8,
+  "num_train_epochs": 50,
+  "learning_rate": 2e-5,
+  "adam_epsilon": 1e-8,
+  "warmup_proportion": 0.0,
+  "max_grad_norm": 1.0,
+  "seed": 42
+}
