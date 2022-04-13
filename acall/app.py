@@ -4,10 +4,15 @@ app = Flask (__name__)
     
 
 #데코레이더로 라우팅 경로 지정
+@app.route('/acall/test')
+def test():
+    return "acall test api"
+
+
 @app.route('/acall/pageMap', methods = ['POST'])
 def classify():
-    print("api call here")
     param = request.get_json()
+    print(param)
     return jsonify(param)
  
 if __name__ == "__main__":
