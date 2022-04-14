@@ -1,7 +1,6 @@
 {
   "model_path": "model/tbert",
   "output_dir": "model/acall",
-  "page_num": 5,
   "max_seq_len": 128,
   "do_train": true,
   "do_eval": false,

@@ -21,14 +21,18 @@ def test():
 @app.route('/acall/trainer', methods = ['POST'])
 def train_acall():
     data = request.get_json()
-    with open('./data/acall_data_simple2.json', 'w', encoding='utf-8') as f:
+    train_file = './data/acall_data_simple2.json'
+    with open(train_file, 'w', encoding='utf-8') as f:
         json.dump(data,f) 
-    print(data)
-    train('./data/acall_data_simple2.json')
-    print(type(data)) #dict
+    page_num = len(data['data'])
+    print(f'분류할 페이지 수는 {page_num} 입니다')
     
+    #print(type(data)) #dict
     
-    return json.dumps(data, ensure_ascii=False) #한글을 출력할 때 에러가 있을 수 있어서 jsonify 대신 json.dumps(string) 씀, json string 반환 
+    train(train_file, page_num)
+    return 'train complete'
+    
+    #return json.dumps(data, ensure_ascii=False) #한글을 출력할 때 에러가 있을 수 있어서 jsonify 대신 json.dumps(string) 씀, json string 반환 
 
    
 

@@ -28,7 +28,7 @@ from tokenizer import KobortTokenizer
 logger = logging.getLogger(__name__)
 
 
-def train(train_file_path):
+def train(train_file_path, page_num):
     with open(os.path.join('config','acall_config.json')) as f:
         args = AttrDict(json.load(f))
     logger.info(f"Training parameters {args}")
@@ -50,7 +50,7 @@ def train(train_file_path):
     )
     data_obj = AcallDataset(tokenizer=tokenizer,
                             dataset=data,
-                            page_num=args.page_num,
+                            page_num=page_num,
                             max_seq_len=args.max_seq_len,
                             batch_size=args.train_batch_size,
                             shuffle=False,
@@ -59,9 +59,9 @@ def train(train_file_path):
     total_steps = len(train_dataloader) * args.num_train_epochs
     #Load model
     logger.info("load model...")
-    labels = ['페이지 : '+str(i) for i in range(1,args.page_num+1)]
+    labels = ['페이지 : '+str(i) for i in range(1,page_num+1)]
     model = RobertaForSequenceClassification.from_pretrained(args.model_path,
-                                                            num_labels = args.page_num,
+                                                            num_labels = page_num,
                                                             id2label = {str(i):label for i, label in enumerate(labels)},
                                                             label2id = {label:i for i, label in enumerate(labels)})
     
