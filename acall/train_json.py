@@ -28,7 +28,7 @@ from tokenizer import KobortTokenizer
 logger = logging.getLogger(__name__)
 
 
-def main():
+def train(train_file_path):
     with open(os.path.join('config','acall_config.json')) as f:
         args = AttrDict(json.load(f))
     logger.info(f"Training parameters {args}")
@@ -42,7 +42,7 @@ def main():
     #Load tokenizer
     tokenizer = KobortTokenizer("wp-mecab").tokenizer
     #read data
-    data = make_acall_data(file_path=os.path.join(args.data_dir, args.train_file))
+    data = make_acall_data(file_path=train_file_path)
     #make data object
     kwargs = (
         {"num_workers":torch.cuda.device_count(), "pin_memory":True} if torch.cuda.is_available()
@@ -131,6 +131,3 @@ def train_step(args, model, optimizer, scheduler, step, batch):
     scheduler.step()
     
     return loss
-
-if __name__ == '__main__':
-    main()
