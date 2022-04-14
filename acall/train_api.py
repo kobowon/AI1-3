@@ -15,8 +15,8 @@ def train():
     data = request.get_json()
     with open('./data/acall_data_simple2.json', 'w', encoding='utf-8') as f:
         json.dump(data,f) 
-    print(param)
-    return json.dumps(param)
+    print(data)
+    return json.dumps(data, ensure_ascii=False) #한글을 출력할 때 에러가 있을 수 있어서 jsonify 대신 json.dumps(string) 씀, json string 반환 
  
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="8087")
