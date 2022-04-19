@@ -1,3 +1,63 @@
 CUDA_VISIBLE_DEVICES=0 python classify.py \
-    --model_path '/data/bowon_ko/TBERT_Distil/220110/model_epoch_2.pth' \
-    --output_dir '/data/bowon_ko/TBERT_Distil/220110/finetune/acall/' \
+    --page_num 5 \
+
+
+CUDA_VISIBLE_DEVICES=0 python train.py \
+    --page_num 5 \
+    --train_file acall_data_simple.json \
+    --num_train_epochs 50 \
+    --output_dir /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_2 \
+    --train_batch_size 16
+
+python infer.py \
+    --model_path /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_2 \
+    --page_num 5 
+
+
+<s>question</s>로 학습
+self.collate_fn = CollateAcallOneStep
+CUDA_VISIBLE_DEVICES=0 python train.py \
+    --page_num 5 \
+    --train_file acall_data_simple.json \
+    --num_train_epochs 100 \
+    --output_dir /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_3 \
+    --train_batch_size 8
+테스트
+python infer.py \
+    --model_path /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_3\
+    --page_num 5
+
+<s>key</s>question</s>로 학습
+self.collate_fn = CollateAcallTwoStep
+CUDA_VISIBLE_DEVICES=0 python train_json.py \
+    --page_num 5 \
+    --train_file acall_data_simple.json \
+    --num_train_epochs 100 \
+    --output_dir /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_2 \
+    --train_batch_size 8
+테스트
+python infer.py \
+    --model_path /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_2 \
+    --page_num 5 \
+    --infer_batch_size 10
+
+<s>description</s>key</s>question</s>로 학습
+self.collate_fn = CollateAcall
+CUDA_VISIBLE_DEVICES=0 python train.py \
+    --page_num 5 \
+    --train_file acall_data_simple.json \
+    --num_train_epochs 100 \
+    --output_dir /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_1 \
+    --train_batch_size 8
+테스트
+python infer.py \
+    --model_path /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_1\
+    --page_num 5
+    
+
+CUDA_VISIBLE_DEVICES=1 python train.py \
+    --page_num 5 \
+    --train_file acall_data_simple.json \
+    --num_train_epochs 100 \
+    --output_dir /data/bowon_ko/TBERT_Distil/220110/finetune/acall/version_2 \
+    --train_batch_size 8

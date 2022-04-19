@@ -132,7 +132,7 @@ if __name__ == '__main__':
     parser.add_argument("--output_dir", type=str, default='/data/bowon_ko/TBERT_Distil/220322/finetune/acall/') 
     parser.add_argument("--page_num", type=int, default=20)
     parser.add_argument("--max_seq_len", type=int, default=128)
-    parser.add_argument("--data_dir", type=str, default='/home/ubuntu/bowon_ko/acall/data')
+    parser.add_argument("--data_dir", type=str, default='/home/ubuntu/bowon_ko/AI1-3/acall/data')
     parser.add_argument("--train_file", type=str, default='acall_data.json')
     parser.add_argument("--dev_file",type=str, default=None)
     parser.add_argument("--test_file",type=str, default=None)

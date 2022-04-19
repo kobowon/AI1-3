@@ -28,9 +28,10 @@ def make_acall_data(file_path=None, inference_text=None):
     final_data = []
     if file_path: #for train
         with open(file_path) as f:
-            data = json.load(f)['1']
+            print(file_path)
+            data = json.load(f)['data']
         #data 수 == label 수
-        lable_list = [str(i) for i in range(len(data))]
+        lable_list = ['페이지 : '+str(i) for i in range(len(data))]
         for item in data:
             description = item['description']
             keywords = item['keywords']
