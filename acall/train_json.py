@@ -29,8 +29,9 @@ logger = logging.getLogger(__name__)
 
 
 def train(train_file_path, page_num):
-    with open(os.path.join('config','acall_config.json')) as f:
+    with open(os.path.join('config','acall_train_config.json')) as f:
         args = AttrDict(json.load(f))
+    args.page_num = page_num
     logger.info(f"Training parameters {args}")
     
     init_logger()
@@ -91,12 +92,25 @@ def train_start(args, train_dataloader, model, optimizer, scheduler):
 def train_end(args, model):
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
+    
+    #checkpoint file & argument 저장
     model.save_pretrained(args.output_dir)
     torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
     
+    #inference를 위한 config 저장
+    infer_config =  {'page_num' : args.page_num,
+                     'max_seq_len' : args.max_seq_len, 
+                     'model_path' : args.output_dir,
+                     'seed' : args.seed}
+    
+    infer_config_path = os.path.join('config','acall_infer_config.json')
+    with open(infer_config_path, 'w', encoding='utf-8') as f:
+        json.dump(infer_config,f)
+    
+    
     logger.info(f"save final model checkpoint file at {args.output_dir}...")
     logger.info(f"save final model arguments file at {args.output_dir}...")
-    
+    logger.info(f"save inference config file at {infer_config_path}...")
         
     
 def train_epoch(args, train_dataloader, model, optimizer, scheduler, epoch, step_num):
