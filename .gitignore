@@ -1,6 +1,6 @@
 model/
 docker_acall/Dockerfile
-
+style_classifier/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
