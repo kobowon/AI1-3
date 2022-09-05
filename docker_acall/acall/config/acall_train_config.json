@@ -1,0 +1,14 @@
+{
+  "model_path": "model/tbert",
+  "output_dir": "model/acall",
+  "max_seq_len": 128,
+  "do_train": true,
+  "do_eval": false,
+  "train_batch_size": 8,
+  "num_train_epochs": 10,
+  "learning_rate": 2e-5,
+  "adam_epsilon": 1e-8,
+  "warmup_proportion": 0.0,
+  "max_grad_norm": 1.0,
+  "seed": 42
+}
