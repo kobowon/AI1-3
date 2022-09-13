@@ -47,7 +47,12 @@ class KobortTokenizer:
             return tokens_with_unk, tokens_without_unk
 
     def encode(self, text):
-        return self.tokenizer.encode(text)
+        if "mecab" in self.model_name:
+            morphs = self.mecab.morphs(text)
+            morphs_text = " ".join(morphs)
+            return self.tokenizer.encode(morphs_text)
+        else:
+            return self.tokenizer.encode(text)
 
 
 # def load_tokenizer(model_name="wp-mecab"):
